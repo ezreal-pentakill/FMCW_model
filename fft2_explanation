@@ -1,0 +1,67 @@
+w0=1;k=1;
+E0=1;
+%定义空间坐标点和时间坐标点
+X=0:0.4:1000;
+T=0:0.4:1000;
+lamda=2*pi/k;
+T0=2*pi/w0;
+%坐标轴的变换（三步）
+%1.看有多少个数据点
+cells=length(X);
+T_cells=length(T);
+%2.二维度分别有多少个周期
+n_lamda=max(X)/lamda;
+n_T0=max(X)/T0;
+%3.每一个周期内，每一个波长内有多少个数据点
+cell_per_lamda = cells/n_lamda;
+cell_per_T0 = cells/n_T0;
+
+%定义k空间和w空间
+kx=linspace(-cell_per_lamda/2,cell_per_lamda/2,cells);
+w=linspace(-cell_per_T0/2,cell_per_T0/2,cells);
+
+E=zeros(length(X),length(T));
+for     ii=1:length(X)
+    for jj=1:length(T)
+        E(ii,jj)=E0*sin(w0*T(jj)-k*X(ii));
+    end
+end
+
+figure;
+%imagesc(b):将数组b中的数据显示为一个图像，
+% 该图像使用颜色图中的全部颜色。
+% b中的每个元素指定图像的一个像素的颜色。
+% 生成图像是m*n的像素网格，其中m,n分别为c中的行数和列数。
+imagesc(X,T,E');
+%shading 函数控制曲面和补片图形对象的颜色着色。
+%shading interp 通过在每个线条或面中对颜色图索引或真彩色值进行插值来改变该线条或面中的颜色
+shading interp
+%将当前图窗的颜色图设置为预定义的颜色图之一,此处选用jet
+colormap("jet");
+%运用普通坐标格式x y
+axis xy;
+%这里我们只截取0到100，使图像更为清晰
+xlim([0 100])
+ylim([0 100])
+%坐标轴标记
+xlabel('X')
+ylabel('Y')
+%坐标轴的字体及大小设置
+set(gca,'fontsize',20)
+
+fft_E=fft2(E);
+fft_E=fftshift(fft_E);
+fft_E=abs(fft_E);
+fft_E=fliplr(fft_E);
+
+figure
+imagesc(kx,w,log(fft_E));
+shading interp
+colormap("jet");
+axis xy
+%设置颜色图范围
+caxis([8 20])
+xlim([-2 2])
+ylim([0 2])
+%显示色阶的颜色栏
+colorbar
